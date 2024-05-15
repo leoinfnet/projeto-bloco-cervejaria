@@ -2,6 +2,7 @@ package br.com.acme.cervejaria.controller;
 
 import br.com.acme.cervejaria.exception.ResourceNotFoundException;
 import br.com.acme.cervejaria.model.Cerveja;
+import br.com.acme.cervejaria.payload.MessagePayload;
 import br.com.acme.cervejaria.service.CervejaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +20,12 @@ import java.util.*;
 @RestController
 @RequestMapping("/cerveja")
 public class CervejaController {
-
+    Logger logger = LoggerFactory.getLogger(CervejaController.class);
     final CervejaService cervejaService;
 
     public CervejaController(CervejaService cervejaService) {
         this.cervejaService = cervejaService;
     }
-    @Operation(summary = "Busca todas as cervejas")
     @GetMapping
     public ResponseEntity<List<Cerveja>> getAll(@RequestParam(required = false) Optional<String> nome){
         System.out.println(nome);
@@ -41,23 +40,11 @@ public class CervejaController {
             }
         }
     }
-
-    @Operation(summary = "Busca uma cerveja pelo ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cerveja encontrada",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Cerveja.class)) }),
-            @ApiResponse(responseCode = "400", description = "Id Invalido",
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = "Cerveja nao encontrada",
-                    content = @Content)
-    })
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id){
         try{
             Cerveja localizada = cervejaService.getById(id);
             return ResponseEntity.ok(localizada);
-
         }catch (ResourceNotFoundException ex){
             Map<String, String> message = Map.of("Message", ex.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
@@ -65,28 +52,57 @@ public class CervejaController {
     }
     @Operation(summary = "Salva uma cerveja")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cerveja Salva",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Cerveja.class)) })
+            @ApiResponse(responseCode = "201", description = "Cerveja Salva",
+                            content ={@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Cerveja.class))} )
     })
     @PostMapping
-    public void save(@RequestBody Cerveja cerveja){
-        System.out.println(cerveja);
-        CervejaService cervejaService = new CervejaService();
+    public ResponseEntity<MessagePayload> save(@RequestBody Cerveja cerveja){
         cervejaService.save(cerveja);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new MessagePayload("Criado com sucesso"));
 
-        System.out.println("Inserindo uma cerveja");
     }
-    @Operation(summary = "Atualiza uma cerveja")
+    @Operation(summary = "Atualizando uma cerveja")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Atualizado com sucesso com sucesso",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MessagePayload.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "Ocorreu um Erro",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MessagePayload.class))}
+            )
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<MessagePayload> update(@PathVariable Integer id, @RequestBody Cerveja cerveja){
+        try {
+            cervejaService.update(id,cerveja);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MessagePayload("Atualizado com sucesso"));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessagePayload(ex.getMessage()));
+        }
 
-    @PutMapping
-    public void update(){
-        System.out.println("atualizando uma cerveja");
     }
+
     @Operation(summary = "Deleta uma cerveja")
-
-    @DeleteMapping
-    public void delete(){
-        System.out.println("deletando uma cerveja");
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Deletado com sucesso",
+                content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = MessagePayload.class))}
+            ),
+            @ApiResponse(responseCode = "404", description = "Ocorreu um Erro",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MessagePayload.class))}
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<MessagePayload> delete(@PathVariable Integer id){
+        logger.info("Deletando uma cerveja");
+        try {
+            cervejaService.deleteById(id);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MessagePayload("Deletado com sucesso"));
+        }catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessagePayload(ex.getMessage()));
+        }
     }
 }

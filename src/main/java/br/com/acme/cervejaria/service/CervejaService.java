@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class CervejaService {
@@ -21,11 +23,9 @@ public class CervejaService {
         if(id < 0){
             throw new ResourceNotFoundException("Valor Invalido - NAO PODE SER NEGATIVO");
         }else {
-            try{
-                return this.cervejas.get(id);
-            }catch (IndexOutOfBoundsException ex){
-                throw new ResourceNotFoundException("Objeto Nao Encontrando");
-            }
+            Optional<Cerveja> cervejaOpt = cervejas.stream().filter(cerveja -> cerveja.getCodigo() == id).findFirst();
+            if(cervejaOpt.isEmpty()) throw new ResourceNotFoundException("Objeto Nao Encontrando");
+            return cervejaOpt.get();
         }
     }
     public void save(Cerveja cerveja){
@@ -39,17 +39,22 @@ public class CervejaService {
         List<Cerveja> all = getAll();
         List<Cerveja> resultado  = all.stream().filter(cerveja -> cerveja.getNome().startsWith(nome)).toList();
 
-        /*
-        for(Cerveja ceveja: all){
-            if(ceveja.getNome().startsWith(nome)){
-                resultado.add(ceveja);
-            }
-        }
-        return resultado;
-
-         */
         return resultado;
     }
+    public void deleteById(Integer id) {
+       if(resourceNotFound(id)){
+           throw new ResourceNotFoundException("Cerveja Não Localizada");
+       }
+       cervejas.remove(cervejas.get(id));
+    }
+    public void update(Integer id, Cerveja cerveja) {
+        if(resourceNotFound(id)){
+            throw new ResourceNotFoundException("Cerveja Não Localizada");
+        }
+        cervejas.set(id,cerveja);
+    }
 
-
+    private boolean resourceNotFound(Integer id) {
+        return cervejas.stream().filter(cerveja -> cerveja.getCodigo() == id).findFirst().isEmpty();
+    }
 }

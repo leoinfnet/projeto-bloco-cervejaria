@@ -4,7 +4,7 @@ import br.com.acme.cervejaria.exception.ResourceNotFoundException;
 import br.com.acme.cervejaria.model.Cerveja;
 import br.com.acme.cervejaria.payload.MessagePayload;
 import br.com.acme.cervejaria.repository.CervejaRepository;
-import br.com.acme.cervejaria.service.CervejaServiceOld;
+import br.com.acme.cervejaria.service.CervejaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,13 +22,14 @@ import java.util.*;
 @RequestMapping("/cerveja")
 public class CervejaController {
     Logger logger = LoggerFactory.getLogger(CervejaController.class);
-    final CervejaServiceOld cervejaService;
     final CervejaRepository cervejaRepository;
+    final CervejaService cervejaService;
 
-    public CervejaController(CervejaServiceOld cervejaService, CervejaRepository cervejaRepository) {
+    public CervejaController(CervejaService cervejaService, CervejaRepository cervejaRepository) {
         this.cervejaService = cervejaService;
         this.cervejaRepository = cervejaRepository;
     }
+    /*
     @GetMapping
     public ResponseEntity<List<Cerveja>> getAll(@RequestParam(required = false) Optional<String> nome){
         System.out.println(nome);
@@ -109,4 +110,6 @@ public class CervejaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessagePayload(ex.getMessage()));
         }
     }
+
+     */
 }

@@ -12,7 +12,6 @@ public interface CervejaService {
     void deleteById(Integer id);
     void save(Cerveja cerveja);
     Cerveja update(Integer id, Cerveja atualizada);
-
     List<Cerveja> findWithFilters(CervejaFilters filters);
 
 }

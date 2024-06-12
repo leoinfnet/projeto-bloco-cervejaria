@@ -4,8 +4,11 @@ public class CervejaPojo {
     private int codigo;
     private String nome;
 
-    public CervejaPojo() {
+    public CervejaPojo(int codigo, String nome) {
+        this.codigo = codigo;
+        this.nome = nome;
     }
+
 
     public int getCodigo() {
         return codigo;

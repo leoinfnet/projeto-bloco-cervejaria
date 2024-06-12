@@ -18,7 +18,6 @@ public class EstiloServiceImpl implements EstiloService {
 
     @Override
     public List<Estilo> findAll() {
-
         return estiloRepository.findAll();
 
     }

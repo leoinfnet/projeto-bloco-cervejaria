@@ -1,5 +1,6 @@
 package br.com.acme.cervejaria.service;
 
+import br.com.acme.cervejaria.filters.CervejaFilters;
 import br.com.acme.cervejaria.model.Cerveja;
 
 import java.util.List;
@@ -12,5 +13,6 @@ public interface CervejaService {
     void save(Cerveja cerveja);
     Cerveja update(Integer id, Cerveja atualizada);
 
+    List<Cerveja> findWithFilters(CervejaFilters filters);
 
 }
